@@ -119,5 +119,18 @@ describe("Memory tests suite", () => {
       mem.update(key1, key2, 6 + 2 * constants.ONE_DAY);
       expect(mem.getCount(key1, key2)).toStrictEqual(6);
     });
+
+    it("should set the initial timestamp", () => {
+      const mem: MemoryManager = new MemoryManager(3);
+      mem.setTimestamp(20);
+      expect(mem.getLast("AB", "CD")).toStrictEqual(20);
+      mem.setTimestamp(40);
+      expect(mem.getLast("AB", "CD")).toStrictEqual(40);
+      mem.addStrategy("AB", "CD", 50);
+      expect(mem.getLast("AB", "CD")).toStrictEqual(50);
+      mem.setTimestamp(1);
+      mem.removeStrategy("AB", "CD");
+      expect(mem.getLast("AB", "CD")).toStrictEqual(1);
+    });
   });
 });

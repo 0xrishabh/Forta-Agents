@@ -56,11 +56,17 @@ export class MemoryManager {
   private performMemory: MemoryData;
   private addStratMemory: MemoryData;
   private dailyEvents: Record<string, number[]>;
+  private default: number;
 
   constructor(size: number) {
     this.performMemory = new MemoryData(size);
     this.addStratMemory = new MemoryData(1);
     this.dailyEvents = {};
+    this.default = -1;
+  }
+
+  public setTimestamp(timestamp: number) {
+    this.default = timestamp;
   }
 
   public update(
@@ -93,6 +99,7 @@ export class MemoryManager {
     return Math.max(
       perform.length == 0? -1 : perform[perform.length - 1],
       add.length == 0? -1 : add[add.length - 1],
+      this.default,
     );
   }
 
@@ -107,7 +114,7 @@ export class MemoryManager {
   public removeStrategy(
     keeper: string, 
     strat: string,
-    _: number,
+    _: number = 0,
   ) {
     const key: string = `${keeper}-${strat}`;
     delete this.dailyEvents[key];

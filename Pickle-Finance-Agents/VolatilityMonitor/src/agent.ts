@@ -27,19 +27,9 @@ const initialize = async () => {
   const block: number = await FETCHER.provider.getBlockNumber();
   const data: Block = await FETCHER.provider.getBlock(block);
 
-  // fetch upkeeps data from latest blocks
-  const upkeeps: string[] = await Promise.all(
-    constants.IDS.map(id => FETCHER.getUpkeep(block, id))
-  );
-  const strategies: string[][] = await Promise.all(
-    upkeeps.map(upkeep => FETCHER.getStrategies(block, upkeep))
-  );
-  // Add all the currently added strategies per upkeep
+  // Set initial timestamp
   // to avoid fake huge time without call perform alerts
-  for(let i = 0; i < upkeeps.length; ++i) {
-    for(let strat of strategies[i]) 
-      MEMORY.addStrategy(upkeeps[i], strat, data.timestamp);
-  }
+  MEMORY.setTimestamp(data.timestamp);
 };
 
 export const provideHandleTransaction = (
