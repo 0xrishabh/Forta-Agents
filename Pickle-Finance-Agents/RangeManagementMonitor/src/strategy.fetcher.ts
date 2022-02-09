@@ -18,16 +18,29 @@ export default class StrategyFetcher {
     this.kContract = new Contract(keeper, abi.KEEPER, provider);
   }
 
-  public async getStrategies(block: number): Promise<string[]> {
+  public async getStrategiesLength(block: number): Promise<number> {
     const encodedLength: string = await this.provider.getStorageAt(this.keeper, 0, block);
     const length: number = utils.defaultAbiCoder.decode(['uint256'], encodedLength)[0];
+
+    return length;
+  }
+
+  public async getStrategy(block: number, idx: number): Promise<string> {
+    const strategy: string = await this.kContract
+      .strategyArray(idx, { blockTag: block })
+      .then((strat: string) => strat.toLowerCase());
+
+    return strategy;
+  }
+
+  // for testing purposes
+  public async getStrategies(block: number): Promise<string[]> {
+    const length: number = await this.getStrategiesLength(block);
 
     const strategiesPromises: Promise<string>[] = [];
     for (let i = 0; i < length; ++i){
       strategiesPromises.push(
-        this.kContract
-          .strategyArray(i, { blockTag: block })
-          .then((strat: string) => strat.toLowerCase())
+        this.getStrategy(block, i)
       )
     }
 

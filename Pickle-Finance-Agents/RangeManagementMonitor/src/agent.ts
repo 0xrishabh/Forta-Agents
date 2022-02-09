@@ -29,14 +29,12 @@ export const provideHandleBlock = (fetcher: StrategyFetcher): HandleBlock =>
     const block: number = blockEvent.blockNumber;
     const findings: Finding[] = [];
 
-    const strategies: string[] = await fetcher.getStrategies(block);
-    const ticks: TickInfo[] = await Promise.all(
-      strategies.map(strat => fetcher.getTicks(block, strat))
-    );
-    for(let i = 0; i < strategies.length; ++i){
-      const tick: TickInfo = ticks[i];
+    const length: number = await fetcher.getStrategiesLength(block);
+    for(let i = 0; i < length; ++i){
+      const strategy: string = await fetcher.getStrategy(block, i);
+      const tick: TickInfo = await fetcher.getTicks(block, strategy);
       if(tick.lower.gt(tick.current) || tick.upper.lt(tick.current))
-        findings.push(createFinding(tick, strategies[i]));
+        findings.push(createFinding(tick, strategy));
     }
     
     return findings;

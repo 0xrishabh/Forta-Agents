@@ -29,18 +29,29 @@ const createFinding = (meta: string[]): Finding => Finding.fromObject({
 })
 
 describe("RMM agent tests suite", () => {
-  const mockStrategies = jest.fn();
+  const mockStrategy = jest.fn();
+  const mockLenght = jest.fn();
   const mockTicks = jest.fn();
   const mockFetcher = {
-    getStrategies: mockStrategies,
+    getStrategiesLength: mockLenght,
+    getStrategy: mockStrategy,
     getTicks: mockTicks,
   };
   const handler: HandleBlock = provideHandleBlock(mockFetcher as any);
 
+  const prepareMocks = (block: number, strats: string[]) => {
+    when(mockLenght)
+      .calledWith(block)
+      .mockReturnValueOnce(strats.length);
+    for(let i = 0; i < strats.length; ++i){
+      when(mockStrategy)
+        .calledWith(block, i)
+        .mockReturnValueOnce(strats[i]);
+    }
+  };
+
   it("should return empty findings if there is no strategies", async () => {
-    when(mockStrategies)
-      .calledWith(10)
-      .mockReturnValueOnce([]);
+    prepareMocks(10, []);
 
     const block: BlockEvent = new TestBlockEvent().setNumber(10);
     const findings: Finding[] = await handler(block);
@@ -48,9 +59,8 @@ describe("RMM agent tests suite", () => {
   });
 
   it("should return empty findings if the current tick is in range", async () => {
-    when(mockStrategies)
-      .calledWith(101)
-      .mockReturnValueOnce([createAddress("0xdead")]);
+    prepareMocks(101, [createAddress("0xdead")]);
+
     when(mockTicks)
       .calledWith(101, createAddress("0xdead"))
       .mockReturnValueOnce({
@@ -72,9 +82,7 @@ describe("RMM agent tests suite", () => {
       [createAddress("0x4"), "100", "99", "100"],
     ];
 
-    when(mockStrategies)
-      .calledWith(80)
-      .mockReturnValueOnce(CASES.map(([addr,,,]: TEST_CASE) => addr));
+    prepareMocks(80, CASES.map(([addr,,,]: TEST_CASE) => addr));
     for(let [addr, lower, current, upper] of CASES){
       when(mockTicks)
         .calledWith(80, addr)
