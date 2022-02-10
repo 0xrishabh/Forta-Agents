@@ -77,7 +77,8 @@ describe("VM agent tests suite", () => {
   const mockFetcher = {
     registry,
     getUpkeep: jest.fn(),
-    getStrategies: jest.fn(),
+    getStrategy: jest.fn(),
+    getStrategiesLength: jest.fn(),
   }
   const mockMemory = {
     update: jest.fn(),
@@ -102,9 +103,14 @@ describe("VM agent tests suite", () => {
       when(mockFetcher.getUpkeep)
         .calledWith(block, BigNumber.from(IDS[i]))
         .mockReturnValue(KEEPERS[i]);
-      when(mockFetcher.getStrategies)
+      when(mockFetcher.getStrategiesLength)
         .calledWith(block, KEEPERS[i])
-        .mockReturnValue(STRATEGIES[i].map(strat => strat));
+        .mockReturnValue(STRATEGIES[i].length);
+      for(let j = 0; j < STRATEGIES[i].length; ++j){  
+        when(mockFetcher.getStrategy)
+          .calledWith(block, KEEPERS[i], j)
+          .mockReturnValue(STRATEGIES[i][j]);
+      }
     }
   };
 

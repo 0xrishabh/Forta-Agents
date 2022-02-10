@@ -31,7 +31,9 @@ export default class MockProvider {
   public addStorage(contract: string, slot: number, block: number, result: string): MockProvider {
     when(this.getStorageAt)
       .calledWith(contract, slot, block)
-      .mockReturnValue(result);
+      .mockReturnValue(new Promise<string>(
+        resolve => resolve(result)
+      ));
     return this;
   }
 
